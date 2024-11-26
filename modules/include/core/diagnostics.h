@@ -21,6 +21,7 @@ struct mp_diagnostics
 struct mp_diagnostics* mp_create_diagnostics();
 void mp_destroy_diagnostics(struct mp_diagnostics** diags);
 
+MP_PRINTF_FUNC_HINT(3, 4)
 void mp_write_diagnostic(struct mp_diag_list* list, struct mp_source_pos pos, const char* format, ...);
 
 #define EMIT_ERROR(diags, pos, msg, ...) mp_write_diagnostic(&(diags)->errors, pos, msg, ##__VA_ARGS__)
@@ -44,4 +45,4 @@ void mp_write_log(enum mp_log_level level, const char* format, ...);
 #define LOG_ERROR(msg, ...) mp_write_log(mp_log_level_error, LOG_HEADER msg, __FILE__, __LINE__, ##__VA_ARGS__)
 #define LOG_WARNING(msg, ...) mp_write_log(mp_log_level_warning, LOG_HEADER msg, __FILE__, __LINE__, ##__VA_ARGS__)
 #define LOG_INFO(msg, ...) mp_write_log(mp_log_level_info, LOG_HEADER msg, __FILE__, __LINE__, ##__VA_ARGS__)
-#define LOG_TRACE(msg, ...) mp_write_log(mp_logLevel_trace, LOG_HEADER msg, __FILE__, __LINE__, ##__VA_ARGS__)
+#define LOG_TRACE(msg, ...) mp_write_log(mp_log_level_trace, LOG_HEADER msg, __FILE__, __LINE__, ##__VA_ARGS__)

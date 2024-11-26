@@ -18,3 +18,6 @@ struct mp_string
 #define mp_max(a, b) ((a) > (b) ? (a) : (b))
 
 bool mp_isspace(char c);
+bool mp_isprintable(char c);
+bool mp_isdigit(char c);
+bool mp_isalpha(char c);

@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <host/compiler.h>
+#include <core/string.h>
 
 void* mp_host_memset(void* buff, int value, size_t count);
 void* mp_host_memcpy(void* dest, const void* src, size_t count);
@@ -19,3 +20,6 @@ void mp_host_free(void* ptr, size_t bytes);
 void* mp_host_load_library(const char* name);
 void* mp_host_find_library_func(void* opaque, const char* func_name);
 void mp_host_unload_library(void* opaque);
+
+struct mp_string mp_host_open_file(const char* filename);
+void mp_host_close_file(struct mp_string file);

@@ -10,6 +10,14 @@ struct mp_string
     const char* text;
 };
 
+struct mp_rw_string
+{
+    size_t length;
+    char* text;
+};
+
+#define MP_STRING_EMPTY ((struct mp_string){ .length = 0, .text = NULL })
+
 #define mp_memset mp_host_memset
 #define mp_memcpy mp_host_memcpy
 #define mp_memchr mp_host_memchr

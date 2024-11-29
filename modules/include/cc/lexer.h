@@ -60,9 +60,13 @@ struct mp_cc_lex_token
     size_t length;
 };
 
+struct mp_cc_lex_options
+{
+};
+
 struct mp_cc_lexer;
 
-struct mp_cc_lexer* mp_cc_create_lexer(struct mp_source_repo* source, struct mp_diagnostics* diags);
+struct mp_cc_lexer* mp_cc_create_lexer(struct mp_source_repo* source, struct mp_diagnostics* diags, const struct mp_cc_lex_options* opts);
 void mp_cc_destroy_lexer(struct mp_cc_lexer** lexer);
 
 struct mp_cc_lex_token mp_cc_lex_next(struct mp_cc_lexer* lexer);

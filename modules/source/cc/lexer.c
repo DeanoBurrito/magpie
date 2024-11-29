@@ -5,17 +5,24 @@
 struct mp_cc_lexer
 {
     struct mp_source_repo* repo;
+    struct mp_cc_lex_options options;
+    struct mp_diagnostics* diags;
     size_t scan_index;
 };
 
-struct mp_cc_lexer* mp_cc_create_lexer(struct mp_source_repo* source, struct mp_diagnostics* diags)
+struct mp_cc_lexer* mp_cc_create_lexer(struct mp_source_repo* source, struct mp_diagnostics* diags, const struct mp_cc_lex_options* opts)
 {
-    if (NULL == source || NULL == diags)
+    if (NULL == source || NULL == diags || NULL == opts)
         return NULL;
 
     struct mp_cc_lexer* lexer = mp_try_alloc(sizeof(*lexer));
+    if (NULL == lexer)
+        return NULL;
+
+    lexer->options = *opts;
     lexer->repo = source;
     lexer->scan_index = 0;
+    lexer->diags = diags;
 
     return lexer;
 }
@@ -250,10 +257,33 @@ struct mp_cc_lex_token mp_cc_lex_next(struct mp_cc_lexer* lexer)
 }
 
 struct mp_cc_lex_token mp_cc_lex_peek(struct mp_cc_lexer* lexer, size_t offset)
-{}
+{
+    if (NULL == lexer)
+        return (struct mp_cc_lex_token){ .type = lex_token_type_eof };
+
+    //TODO: if we parse future tokens, we should store them so we dont have to re-parse them later
+    const size_t backup_scan_head = lexer->scan_index;
+
+    struct mp_cc_lex_token token = mp_cc_lex_next(lexer);
+    for (size_t i = 0; i < offset && lex_token_type_eof != token.type; i++)
+        token = mp_cc_lex_next(lexer);
+
+    lexer->scan_index = backup_scan_head;
+    return token;
+}
 
 bool mp_cc_lex_match(struct mp_cc_lexer* lexer, enum lex_token_type expected, struct mp_cc_lex_token* token)
-{}
+{
+    if (NULL == lexer)
+        return false;
+
+    struct mp_cc_lex_token next = mp_cc_lex_peek(lexer, 0);
+    if (expected != next.type)
+        return false;
+    
+    *token = next;
+    return true;
+}
 
 struct mp_string mp_cc_lex_token_type_str(enum lex_token_type type)
 {

@@ -51,6 +51,12 @@ enum lex_token_type
 
     lex_token_type_integer_literal,
     lex_token_type_identifier,
+
+    lex_token_type_kw_struct,
+    lex_token_type_kw_union,
+    lex_token_type_kw_return,
+
+    lex_token_type_count
 };
 
 struct mp_cc_lex_token
@@ -64,6 +70,9 @@ struct mp_cc_lex_options
 {
 };
 
+#define MP_CC_DEFAULT_LEXER_OPTIONS \
+    (struct mp_cc_lex_options) { }
+
 struct mp_cc_lexer;
 
 struct mp_cc_lexer* mp_cc_create_lexer(struct mp_source_repo* source, struct mp_diagnostics* diags, const struct mp_cc_lex_options* opts);
@@ -74,3 +83,4 @@ struct mp_cc_lex_token mp_cc_lex_peek(struct mp_cc_lexer* lexer, size_t offset);
 bool mp_cc_lex_match(struct mp_cc_lexer* lexer, enum lex_token_type expected, struct mp_cc_lex_token* token);
 struct mp_string mp_cc_lex_token_type_str(enum lex_token_type type);
 size_t mp_cc_lex_print(struct mp_cc_lexer* lexer, struct mp_cc_lex_token token, struct mp_rw_string str, bool metadata);
+struct mp_source_repo* mp_cc_lex_get_source(struct mp_cc_lexer* lexer);

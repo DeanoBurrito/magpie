@@ -2,6 +2,59 @@
 #include <core/alloc.h>
 #include <core/nanoprintf.h>
 
+const char* token_type_strs[] = 
+{
+    [lex_token_type_eof] = "<eof>",
+    [lex_token_type_left_paren] = "left_paren",
+    [lex_token_type_right_paren] = "right_paren",
+    [lex_token_type_left_brace] = "left_brace",
+    [lex_token_type_right_brace] = "right_brace",
+    [lex_token_type_left_bracket] = "left_bracket",
+    [lex_token_type_right_bracket] = "right_bracket",
+    [lex_token_type_comma] = "comma",
+    [lex_token_type_dot] = "dot",
+    [lex_token_type_arrow] = "arrow",
+    [lex_token_type_minus] = "minus",
+    [lex_token_type_minus_minus] = "minus_minus",
+    [lex_token_type_minus_equals] = "minus_equals",
+    [lex_token_type_plus] = "plus",
+    [lex_token_type_plus_plus] = "plus_plus",
+    [lex_token_type_plus_equals] = "plus_equals",
+    [lex_token_type_slash] = "slash",
+    [lex_token_type_star] = "star",
+    [lex_token_type_semicolon] = "semicolon",
+    [lex_token_type_colon] = "colon",
+    [lex_token_type_less] = "less",
+    [lex_token_type_left_shift] = "left_shift",
+    [lex_token_type_less_equal] = "less_equal",
+    [lex_token_type_left_shift_equals] = "left_shift_equals",
+    [lex_token_type_greater] = "greater",
+    [lex_token_type_right_shift] = "right_shift",
+    [lex_token_type_greater_equal] = "greater_equal",
+    [lex_token_type_right_shift_equals] = "right_shift_equals",
+    [lex_token_type_equals] = "equals",
+    [lex_token_type_equals_equals] = "equals_equals",
+    [lex_token_type_bang] = "bang",
+    [lex_token_type_bang_equals] = "bang_equals",
+    [lex_token_type_tilde] = "tilde",
+    [lex_token_type_ampersand] = "ampersand",
+    [lex_token_type_ampersand_ampersand] = "ampersand_ampersand",
+    [lex_token_type_ampersand_equals] = "ampersand_equals",
+    [lex_token_type_percent] = "percent",
+    [lex_token_type_percent_equals] = "percent_equals",
+    [lex_token_type_question_mark] = "question_mark",
+    [lex_token_type_pipe] = "pipe",
+    [lex_token_type_pipe_pipe] = "pipe_pipe",
+    [lex_token_type_pipe_equals] = "pipe_equals",
+    [lex_token_type_integer_literal] = "integer_literal",
+    [lex_token_type_identifier] = "identifier",
+    [lex_token_type_kw_struct] = "keyword_struct",
+    [lex_token_type_kw_union] = "keyword_union",
+    [lex_token_type_kw_return] = "keyword_return",
+};
+
+MP_STATIC_ASSERT(sizeof(token_type_strs) / sizeof(const char*) == lex_token_type_count);
+
 struct mp_cc_lexer
 {
     struct mp_source_repo* repo;
@@ -280,14 +333,20 @@ bool mp_cc_lex_match(struct mp_cc_lexer* lexer, enum lex_token_type expected, st
     struct mp_cc_lex_token next = mp_cc_lex_peek(lexer, 0);
     if (expected != next.type)
         return false;
+    mp_cc_lex_next(lexer);
     
-    *token = next;
+    if (NULL != token)
+        *token = next;
     return true;
 }
 
 struct mp_string mp_cc_lex_token_type_str(enum lex_token_type type)
 {
-    return (struct mp_string){ .text = "TODO:", .length = 5 };
+    void* found = mp_memchr(token_type_strs[type], 0, -1);
+    if (NULL == found)
+        return (struct mp_string){ .text = NULL, .length = 0 };
+
+    return (struct mp_string){ .text = token_type_strs[type], .length = (uintptr_t)found - (uintptr_t)token_type_strs[type] };
 }
 
 size_t mp_cc_lex_print(struct mp_cc_lexer* lexer, struct mp_cc_lex_token token, struct mp_rw_string str, bool metadata)
@@ -306,4 +365,11 @@ size_t mp_cc_lex_print(struct mp_cc_lexer* lexer, struct mp_cc_lex_token token, 
     if (str.length != 0)
         mp_source_read(lexer->repo, token.begin, str.text + format_len, mp_min(str.length - format_len, token.length));
     return format_len + token.length;
+}
+
+struct mp_source_repo* mp_cc_lex_get_source(struct mp_cc_lexer* lexer)
+{
+    if (NULL == lexer)
+        return NULL;
+    return lexer->repo;
 }

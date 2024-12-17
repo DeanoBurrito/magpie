@@ -51,6 +51,39 @@ const char* token_type_strs[] =
     [lex_token_type_kw_struct] = "keyword_struct",
     [lex_token_type_kw_union] = "keyword_union",
     [lex_token_type_kw_return] = "keyword_return",
+    [lex_token_type_kw_constexpr] = "keyword_constexpr",
+    [lex_token_type_kw_auto] = "keyword_auto",
+    [lex_token_type_kw_static] = "keyword_static",
+    [lex_token_type_kw_extern] = "keyword_extern",
+    [lex_token_type_kw_thread_local] = "keword_",
+    [lex_token_type_kw_inline] = "keword_inline",
+    [lex_token_type_kw_no_return] = "keword_no_return",
+    [lex_token_type_kw_alignas] = "keword_alignas",
+    [lex_token_type_kw_const] = "keword_const",
+    [lex_token_type_kw_volatile] = "keword_volatile",
+    [lex_token_type_kw_restrict] = "keword_restrict",
+    [lex_token_type_kw_atomic] = "keword_atomic",
+};
+
+#define MAX_KEYWORD_LENGTH 16
+const char* keyword_literals[] =
+{
+    [lex_token_type_kw_struct] = "struct",
+    [lex_token_type_kw_union] = "union",
+    [lex_token_type_kw_enum] = "enum",
+    [lex_token_type_kw_return] = "return",
+    [lex_token_type_kw_constexpr] = "constexpr",
+    [lex_token_type_kw_auto] = "auto",
+    [lex_token_type_kw_static] = "static",
+    [lex_token_type_kw_extern] = "extern",
+    [lex_token_type_kw_thread_local] = "_Thread_local",
+    [lex_token_type_kw_inline] = "inline",
+    [lex_token_type_kw_no_return] = "_Noreturn",
+    [lex_token_type_kw_alignas] = "_Alignas",
+    [lex_token_type_kw_const] = "const",
+    [lex_token_type_kw_volatile] = "volatile",
+    [lex_token_type_kw_restrict] = "restrict",
+    [lex_token_type_kw_atomic] = "atomic",
 };
 
 MP_STATIC_ASSERT(sizeof(token_type_strs) / sizeof(const char*) == lex_token_type_count);
@@ -108,7 +141,7 @@ static struct mp_cc_lex_token lex_number(struct mp_cc_lexer* lexer, int scan)
     return token;
 }
 
-static struct mp_cc_lex_token lex_identifier(struct mp_cc_lexer* lexer, int scan)
+static struct mp_cc_lex_token lex_identifier_or_keyword(struct mp_cc_lexer* lexer, int scan)
 {
     if (scan != '_' && !mp_isalpha(scan))
         return (struct mp_cc_lex_token){ .type = lex_token_type_eof };
@@ -121,8 +154,31 @@ static struct mp_cc_lex_token lex_identifier(struct mp_cc_lexer* lexer, int scan
             break;
         lexer->scan_index++;
     }
-    
+
     token.length = lexer->scan_index - token.begin;
+
+    if (token.length >= MAX_KEYWORD_LENGTH)
+        return token;
+
+    char comp_buffer[MAX_KEYWORD_LENGTH];
+    mp_source_read(lexer->repo, token.begin, comp_buffer, token.length);
+
+    //check for keyword matches
+    for (size_t i = 0; i < lex_token_type_count; i++)
+    {
+        if (NULL == keyword_literals[i])
+            continue;
+
+        const size_t kw_len = mp_strlen(keyword_literals[i]);
+        if (kw_len != token.length)
+            continue;
+        if (mp_memcmp(comp_buffer, keyword_literals[i], kw_len) != 0)
+            continue;
+
+        token.type = i;
+        break;
+    }
+
     return token;
 }
 
@@ -305,7 +361,7 @@ struct mp_cc_lex_token mp_cc_lex_next(struct mp_cc_lexer* lexer)
     default:
         if (mp_isdigit(scan))
             return lex_number(lexer, scan);
-        return lex_identifier(lexer, scan);
+        return lex_identifier_or_keyword(lexer, scan);
     }
 }
 

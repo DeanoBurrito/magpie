@@ -8,6 +8,7 @@ void* mp_host_memset(void* buff, int value, size_t count);
 void* mp_host_memcpy(void* dest, const void* src, size_t count);
 void* mp_host_memchr(const void* buff, int value, size_t limit);
 int mp_host_memcmp(const void* lhs, const void* rhs, size_t count);
+int mp_host_strlen(const char* str);
 
 void mp_host_log(const char* message, size_t length);
 

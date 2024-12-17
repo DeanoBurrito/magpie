@@ -54,7 +54,20 @@ enum lex_token_type
 
     lex_token_type_kw_struct,
     lex_token_type_kw_union,
+    lex_token_type_kw_enum,
     lex_token_type_kw_return,
+    lex_token_type_kw_constexpr,
+    lex_token_type_kw_auto,
+    lex_token_type_kw_static,
+    lex_token_type_kw_extern,
+    lex_token_type_kw_thread_local,
+    lex_token_type_kw_inline,
+    lex_token_type_kw_no_return,
+    lex_token_type_kw_alignas,
+    lex_token_type_kw_const,
+    lex_token_type_kw_volatile,
+    lex_token_type_kw_restrict,
+    lex_token_type_kw_atomic,
 
     lex_token_type_count
 };
